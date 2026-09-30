@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>국제로타리 3722지구 교육 자료실</title>
+<meta name="description" content="국제로타리 3722지구 교육 자료를 누구나 열어 보고 내려받을 수 있는 자료실">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F3F5F8; --surface:#FFFFFF; --ink:#141D2B; --muted:#5A6577; --line:#DCE1E9;
+  --accent:#1E4A86; --accent-ink:#FFFFFF; --accent-soft:#E4ECF7;
+  --serif:"Noto Serif KR","Nanum Myeongjo",Georgia,serif;
+  --sans:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme:dark;
+    --ground:#0E131A; --surface:#161D27; --ink:#E5E9F0; --muted:#98A2B3; --line:#2A3442;
+    --accent:#86ACE3; --accent-ink:#0E131A; --accent-soft:#1D2A3D;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;padding-inline:16px;padding-block:env(safe-area-inset-top,0px) 64px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header.top{padding-block:40px 8px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:2px solid var(--ink)}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+h1{font-family:var(--serif);font-weight:800;font-size:clamp(28px,5vw,42px);line-height:1.2;margin:6px 0 14px;text-wrap:balance;letter-spacing:-.01em}
+h1 .num{color:var(--accent)}
+.stats{display:flex;gap:20px;padding-bottom:14px;font-variant-numeric:tabular-nums}
+.stat{display:flex;flex-direction:column;align-items:flex-end}
+.stat b{font-family:var(--mono);font-size:22px;font-weight:500}
+.stat span{font-size:12px;color:var(--muted)}
+
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:5px 10px;font-size:13px;white-space:nowrap;text-decoration:none;color:var(--ink);display:inline-block}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+
+.toolbar{display:flex;flex-direction:column;gap:12px}
+.search{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 14px;background:var(--surface)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer}
+.chip .c{font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:4px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.chip[aria-pressed="true"] .c{color:inherit;opacity:.7}
+
+.register{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.row{display:grid;grid-template-columns:64px 1fr 110px 80px 96px auto;gap:14px;align-items:center;padding:14px 18px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row.head{font-size:12px;color:var(--muted);letter-spacing:.06em;padding-block:10px;background:var(--ground)}
+.no{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.title a{color:var(--ink);font-weight:600;text-decoration:none;overflow-wrap:anywhere}
+.title a:hover{color:var(--accent);text-decoration:underline}
+.tag{font-size:12px;background:var(--accent-soft);color:var(--accent);padding:3px 8px;border-radius:4px;justify-self:start;white-space:nowrap}
+.meta{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ops{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.empty{padding:48px 20px;text-align:center;color:var(--muted)}
+.empty b{display:block;font-family:var(--serif);font-size:18px;color:var(--ink);margin-bottom:6px}
+footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+
+@media (max-width:720px){
+  .row.head{display:none}
+  .row{grid-template-columns:1fr auto;grid-template-areas:"no tag" "title title" "meta ops";gap:6px 10px}
+  .no{grid-area:no}.tag{grid-area:tag;justify-self:end}.title{grid-area:title}
+  .meta.size{display:none}.meta.date{grid-area:meta}.ops{grid-area:ops}
+  .stats{gap:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Rotary International · District 3722</div>
+      <h1>국제로타리 <span class="num">3722</span>지구<br>교육 자료실</h1>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="statCount">0</b><span>등록 자료</span></div>
+      <div class="stat"><b id="statSize">0 MB</b><span>누적 용량</span></div>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <input class="search" id="search" type="search" placeholder="자료 제목으로 검색">
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="register" id="register" aria-live="polite">
+    <div class="empty"><b>자료 목록을 불러오는 중입니다</b></div>
+  </section>
+
+  <footer>자료 제목이나 ‘열기’를 누르면 PDF가 새 창에서 열립니다. 로그인 없이 누구나 보고 내려받을 수 있습니다.</footer>
+</div>
+
+<script>
+/*
+  자료 추가 방법
+  - GitHub Pages에 올린 경우: files/분류이름/ 폴더에 PDF만 올리면 목록에 자동으로 나타납니다.
+    파일 이름을 "2026-09-28 자료제목.pdf"처럼 날짜로 시작하면 등록일로 표시됩니다.
+  - 다른 곳에 올린 경우: 아래 FALLBACK 목록에 한 줄씩 추가합니다.
+*/
+const FALLBACK = [
+  { path: "files/클럽 운영/2026-09-28 2026-27 마산가고파 클럽운영계획서 (이사회 조직도).pdf", size: 1231187 },
+];
+const CATS = ["클럽 운영","회원교육","리더십","봉사 프로젝트","행정·양식","세미나 자료"];
+
+let rows = [], filterCat = "전체", query = "";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtSize = b => b >= 1048576 ? (b/1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b/1024)) + " KB";
+const encPath = p => p.split("/").map(encodeURIComponent).join("/");
+
+function toRow(f){
+  const parts = f.path.split("/");
+  const name = parts[parts.length-1].replace(/\.pdf$/i, "");
+  const category = parts.length > 2 ? parts[1] : "기타";
+  const m = name.match(/^(\d{4})-(\d{2})-(\d{2})\s+(.*)$/);
+  return { path: f.path, size: f.size || 0, category,
+    date: m ? `${m[1]}.${m[2]}.${m[3]}` : "", sortKey: m ? `${m[1]}${m[2]}${m[3]}` : "0",
+    title: (m ? m[4] : name).trim() };
+}
+
+async function loadFromGitHub(){
+  const host = location.hostname;
+  if (!host.endsWith(".github.io")) return null;
+  const owner = host.split(".")[0];
+  const first = location.pathname.split("/").filter(Boolean)[0];
+  const repo = first && !first.includes(".") ? first : host;
+  const info = await fetch(`https://api.github.com/repos/${owner}/${repo}`).then(r => r.ok ? r.json() : Promise.reject());
+  const tree = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${info.default_branch}?recursive=1`).then(r => r.ok ? r.json() : Promise.reject());
+  return tree.tree.filter(t => t.type === "blob" && t.path.startsWith("files/") && /\.pdf$/i.test(t.path))
+    .map(t => ({ path: t.path, size: t.size }));
+}
+
+function render(){
+  const total = rows.reduce((s,r) => s + r.size, 0);
+  $("statCount").textContent = rows.length;
+  $("statSize").textContent = total ? fmtSize(total) : "0 MB";
+
+  const counts = {}; rows.forEach(r => counts[r.category] = (counts[r.category]||0) + 1);
+  const cats = [...CATS, ...Object.keys(counts).filter(c => !CATS.includes(c))];
+  $("chips").innerHTML = ["전체", ...cats].map(c => {
+    const n = c === "전체" ? rows.length : (counts[c]||0);
+    return `<button class="chip" type="button" data-cat="${esc(c)}" aria-pressed="${c===filterCat}">${esc(c)}<span class="c">${n}</span></button>`;
+  }).join("");
+
+  const q = query.trim().toLowerCase();
+  const list = rows.filter(r => (filterCat === "전체" || r.category === filterCat) && (!q || r.title.toLowerCase().includes(q)));
+  const el = $("register");
+  if (!rows.length){ el.innerHTML = `<div class="empty"><b>아직 등록된 자료가 없습니다</b>곧 자료가 올라옵니다.</div>`; return; }
+  if (!list.length){ el.innerHTML = `<div class="empty"><b>조건에 맞는 자료가 없습니다</b>검색어나 분류를 바꿔 보세요.</div>`; return; }
+  el.innerHTML = `<div class="row head"><span>번호</span><span>자료명</span><span>분류</span><span>크기</span><span>등록일</span><span></span></div>` +
+    list.map(r => { const href = esc(encPath(r.path)); return `<div class="row">
+      <span class="no">No.${String(r.no).padStart(3,"0")}</span>
+      <div class="title"><a href="${href}" target="_blank" rel="noopener">${esc(r.title)}</a></div>
+      <span class="tag">${esc(r.category)}</span>
+      <span class="meta size">${fmtSize(r.size)}</span>
+      <span class="meta date">${esc(r.date)}</span>
+      <div class="ops"><a class="btn" href="${href}" target="_blank" rel="noopener">열기</a><a class="btn primary" href="${href}" download>내려받기</a></div>
+    </div>`; }).join("");
+}
+
+$("search").addEventListener("input", e => { query = e.target.value; render(); });
+$("chips").addEventListener("click", e => { const b = e.target.closest("[data-cat]"); if (b){ filterCat = b.dataset.cat; render(); } });
+
+(async () => {
+  let files = null;
+  try { files = await loadFromGitHub(); } catch(_) { files = null; }
+  const base = (files || FALLBACK).map(toRow);
+  const numbered = [...base].sort((a,b) => a.sortKey.localeCompare(b.sortKey) || a.title.localeCompare(b.title, "ko")).map((r,i) => ({ ...r, no: i+1 }));
+  rows = numbered.reverse();
+  render();
+})();
+</script>
+</body>
+</html>
