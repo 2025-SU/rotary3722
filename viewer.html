@@ -120,11 +120,12 @@ function fail(msg){
   }
 
   $("status").hidden = true; $("book").hidden = false; $("nav").hidden = false; $("tip").hidden = false;
+  const cover = total > 2;
   const pageW = 500, pageH = Math.round(pageW * ratio);
   const flip = new St.PageFlip($("book"), {
     width: pageW, height: pageH, size: "stretch",
     minWidth: 240, maxWidth: 900, minHeight: Math.round(240 * ratio), maxHeight: Math.round(900 * ratio),
-    showCover: total > 2, maxShadowOpacity: 0.45, mobileScrollSupport: false, flippingTime: 700
+    showCover: cover, maxShadowOpacity: 0.45, mobileScrollSupport: false, flippingTime: 700
   });
   flip.loadFromImages(images);
 
@@ -140,10 +141,11 @@ function fail(msg){
     const i = flip.getCurrentPageIndex();
     const n = flip.getPageCount();
     const mode = flip.getOrientation ? flip.getOrientation() : "landscape";
-    const showing = mode === "landscape" && i > 0 && i < n - 1 ? `${i+1}–${Math.min(i+2, n)}` : `${i+1}`;
+    const single = mode !== "landscape" || (cover && (i === 0 || (i === n - 1 && n % 2 === 0)));
+    const showing = single || i + 1 >= n ? `${i+1}` : `${i+1}–${i+2}`;
     $("count").textContent = `${showing} / ${n}`;
     $("prev").disabled = i <= 0;
-    $("next").disabled = i >= n - (mode === "landscape" && i > 0 ? 2 : 1);
+    $("next").disabled = single ? i >= n - 1 : i + 2 >= n;
   }
   fitBook();
   window.addEventListener("resize", () => { fitBook(); flip.update && flip.update(); });
