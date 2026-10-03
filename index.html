@@ -164,7 +164,7 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
     <div class="empty"><b>자료 목록을 불러오는 중입니다</b></div>
   </section>
 
-  <footer>자료 제목이나 ‘열기’를 누르면 PDF가 새 창에서 열립니다. 로그인 없이 누구나 보고 내려받을 수 있습니다.</footer>
+  <footer>자료 제목이나 ‘책으로 보기’를 누르면 책장을 넘기듯 자료를 볼 수 있습니다. 로그인 없이 누구나 보고 내려받을 수 있습니다.</footer>
 </div>
 
 <script>
@@ -224,13 +224,13 @@ function render(){
   if (!rows.length){ el.innerHTML = `<div class="empty"><b>아직 등록된 자료가 없습니다</b>곧 자료가 올라옵니다.</div>`; return; }
   if (!list.length){ el.innerHTML = `<div class="empty"><b>조건에 맞는 자료가 없습니다</b>검색어나 분류를 바꿔 보세요.</div>`; return; }
   el.innerHTML = `<div class="row head"><span>번호</span><span>자료명</span><span>분류</span><span>크기</span><span>등록일</span><span></span></div>` +
-    list.map(r => { const href = esc(encPath(r.path)); return `<div class="row">
+    list.map(r => { const href = esc(encPath(r.path)); const view = esc("viewer.html?file=" + encodeURIComponent(r.path)); return `<div class="row">
       <span class="no">No.${String(r.no).padStart(3,"0")}</span>
-      <div class="title"><a href="${href}" target="_blank" rel="noopener">${esc(r.title)}</a></div>
+      <div class="title"><a href="${view}">${esc(r.title)}</a></div>
       <span class="tag">${esc(r.category)}</span>
       <span class="meta size">${fmtSize(r.size)}</span>
       <span class="meta date">${esc(r.date)}</span>
-      <div class="ops"><a class="btn" href="${href}" target="_blank" rel="noopener">열기</a><a class="btn primary" href="${href}" download>내려받기</a></div>
+      <div class="ops"><a class="btn" href="${view}">책으로 보기</a><a class="btn primary" href="${href}" download>내려받기</a></div>
     </div>`; }).join("");
 }
 

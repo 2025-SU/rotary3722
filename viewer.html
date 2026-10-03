@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>자료 보기 · 국제로타리 3722지구 교육 자료실</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;800&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --desk:#1B2433; --desk2:#232E40; --ink:#E8ECF2; --muted:#9AA6B8; --line:#34415A;
+  --accent:#86ACE3; --btn:#2B3850;
+  --serif:"Noto Serif KR","Nanum Myeongjo",Georgia,serif;
+  --sans:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:radial-gradient(ellipse at 50% 40%,var(--desk2),var(--desk) 70%);color:var(--ink);font-family:var(--sans);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+button,a{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.bar{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.back{text-decoration:none;font-size:13px;color:var(--muted);white-space:nowrap}
+.back:hover{color:var(--ink)}
+.ttl{flex:1;min-width:0}
+.ttl .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.ttl h1{font-family:var(--serif);font-size:17px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbtn{border:1px solid var(--line);background:var(--btn);border-radius:6px;padding:6px 12px;font-size:13px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.tbtn:hover{border-color:var(--muted)}
+
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:20px 16px;position:relative}
+#book{margin:0 auto}
+.status{text-align:center;color:var(--muted);font-size:14px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.status b{font-family:var(--serif);color:var(--ink);font-size:18px}
+.meter{width:220px;max-width:70vw;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+
+.nav{display:flex;align-items:center;justify-content:center;gap:14px;padding:12px 16px 16px}
+.nbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--btn);cursor:pointer;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center}
+.nbtn:disabled{opacity:.35;cursor:default}
+.count{font-family:var(--mono);font-size:13px;color:var(--muted);min-width:96px;text-align:center;font-variant-numeric:tabular-nums}
+.tip{font-size:11.5px;color:var(--muted);text-align:center;padding-bottom:10px}
+@media (max-width:600px){ .bar .hide-sm{display:none} .ttl h1{font-size:15px} }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <a class="back" href="./">← 자료실</a>
+    <div class="ttl">
+      <div class="eyebrow" id="cat">교육 자료</div>
+      <h1 id="title">자료 보기</h1>
+    </div>
+    <button class="tbtn hide-sm" id="fsBtn" type="button">전체 화면</button>
+    <a class="tbtn" id="dlBtn" href="#" download>내려받기</a>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="status" id="status"><b>자료를 펼치는 중입니다</b><div class="meter"><i id="meterFill"></i></div><span id="statusText">PDF를 불러오는 중…</span></div>
+    <div id="book" hidden></div>
+  </div>
+
+  <div class="nav" id="nav" hidden>
+    <button class="nbtn" id="prev" type="button" aria-label="이전 쪽">‹</button>
+    <span class="count" id="count">1 / 1</span>
+    <button class="nbtn" id="next" type="button" aria-label="다음 쪽">›</button>
+  </div>
+  <div class="tip" id="tip" hidden>책장 모서리를 끌거나 눌러서 넘기세요 · 키보드 ← → 도 됩니다</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const file = params.get("file") || "";
+
+function fail(msg){
+  $("status").innerHTML = `<b>자료를 열 수 없습니다</b><span>${msg}</span><a class="tbtn" href="./">자료실로 돌아가기</a>`;
+}
+
+(async () => {
+  if (!file || !/^files\/.+\.pdf$/i.test(file) || file.includes("..")){ fail("주소가 올바르지 않습니다."); return; }
+  const parts = file.split("/");
+  const name = parts[parts.length-1].replace(/\.pdf$/i, "").replace(/^\d{4}-\d{2}-\d{2}\s+/, "");
+  const url = parts.map(encodeURIComponent).join("/");
+  document.title = name + " · 국제로타리 3722지구 교육 자료실";
+  $("title").textContent = name;
+  $("cat").textContent = parts.length > 2 ? parts[1] : "교육 자료";
+  $("dlBtn").href = url;
+
+  if (!window.pdfjsLib || !window.St){ fail("보기 기능을 불러오지 못했습니다. 인터넷 연결을 확인하고 새로고침해 주세요."); return; }
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+  let pdf;
+  try { pdf = await pdfjsLib.getDocument(url).promise; }
+  catch(e){ fail("파일을 찾을 수 없습니다. 방금 올린 자료라면 1~2분 뒤 다시 열어 주세요."); return; }
+
+  const total = pdf.numPages;
+  const first = await pdf.getPage(1);
+  const base = first.getViewport({ scale: 1 });
+  const ratio = base.height / base.width;
+  const targetW = Math.min(1100, Math.max(700, Math.round(window.innerWidth * (window.devicePixelRatio || 1) * 0.5)));
+  const images = [];
+  for (let i = 1; i <= total; i++){
+    $("statusText").textContent = `${i} / ${total} 쪽 준비 중…`;
+    $("meterFill").style.width = (i / total * 100) + "%";
+    const page = i === 1 ? first : await pdf.getPage(i);
+    const vp0 = page.getViewport({ scale: 1 });
+    const vp = page.getViewport({ scale: targetW / vp0.width });
+    const c = document.createElement("canvas");
+    c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    images.push(c.toDataURL("image/jpeg", 0.86));
+    page.cleanup();
+  }
+
+  $("status").hidden = true; $("book").hidden = false; $("nav").hidden = false; $("tip").hidden = false;
+  const pageW = 500, pageH = Math.round(pageW * ratio);
+  const flip = new St.PageFlip($("book"), {
+    width: pageW, height: pageH, size: "stretch",
+    minWidth: 240, maxWidth: 900, minHeight: Math.round(240 * ratio), maxHeight: Math.round(900 * ratio),
+    showCover: total > 2, maxShadowOpacity: 0.45, mobileScrollSupport: false, flippingTime: 700
+  });
+  flip.loadFromImages(images);
+
+  function fitBook(){
+    const st = $("stage");
+    const availW = st.clientWidth - 32, availH = st.clientHeight - 40;
+    const portrait = availW < 700;
+    const spreadW = portrait ? 1 : 2;
+    const w = Math.min(availW / spreadW, availH / ratio);
+    $("book").style.width = Math.floor(w * spreadW) + "px";
+  }
+  function update(){
+    const i = flip.getCurrentPageIndex();
+    const n = flip.getPageCount();
+    const mode = flip.getOrientation ? flip.getOrientation() : "landscape";
+    const showing = mode === "landscape" && i > 0 && i < n - 1 ? `${i+1}–${Math.min(i+2, n)}` : `${i+1}`;
+    $("count").textContent = `${showing} / ${n}`;
+    $("prev").disabled = i <= 0;
+    $("next").disabled = i >= n - (mode === "landscape" && i > 0 ? 2 : 1);
+  }
+  fitBook();
+  window.addEventListener("resize", () => { fitBook(); flip.update && flip.update(); });
+  flip.on("flip", update);
+  flip.on("changeOrientation", update);
+  update();
+
+  $("prev").addEventListener("click", () => flip.flipPrev());
+  $("next").addEventListener("click", () => flip.flipNext());
+  document.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") flip.flipPrev();
+    if (e.key === "ArrowRight") flip.flipNext();
+  });
+})();
+
+$("fsBtn").addEventListener("click", async () => {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch(_) {}
+});
+document.addEventListener("fullscreenchange", () => { $("fsBtn").textContent = document.fullscreenElement ? "전체 화면 끄기" : "전체 화면"; });
+</script>
+</body>
+</html>
