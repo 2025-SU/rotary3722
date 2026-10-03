@@ -77,6 +77,17 @@ h1 .num{color:var(--accent)}
 .uprow select,.uprow input{border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:var(--ground);color:var(--ink);font:inherit;min-width:160px}
 .btn.big{padding:9px 16px;font-size:14px}
 .upnote{font-size:12px;color:var(--muted);margin:0}
+.upbody p{margin:0;font-size:14px}
+.upbody a{color:var(--accent)}
+.drop{border:2px dashed var(--line);border-radius:10px;padding:36px 16px;text-align:center;cursor:pointer;color:var(--muted);transition:background .15s,border-color .15s;display:flex;flex-direction:column;gap:4px}
+.drop strong{color:var(--accent);font-size:16px}
+.drop small{font-size:12px}
+.drop.over,.drop:hover{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+.uplist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.uplist li{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:8px 12px;border:1px solid var(--line);border-radius:6px;overflow-wrap:anywhere}
+.uplist li .st{white-space:nowrap;font-weight:600}
+.uplist li.ok .st{color:#1F7A4D} .uplist li.bad .st{color:#B3261E} .uplist li.wait .st{color:var(--muted)}
+.linkbtn{border:0;background:none;padding:0;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:12px}
 footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
 
 @media (max-width:720px){
@@ -107,23 +118,44 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
   </section>
 
   <details class="upload" id="upload">
-    <summary><span>자료 올리기 <span class="hint">관리자용 · GitHub 로그인 필요</span></span></summary>
+    <summary><span>자료 올리기 <span class="hint">관리자용</span></span></summary>
     <div class="upbody">
-      <ol>
-        <li>아래에서 <b>분류</b>를 고르고 <b>PDF 올리러 가기</b>를 누르세요.</li>
-        <li>열린 GitHub 화면에 PDF를 <b>끌어다 놓고</b> 아래 초록색 <b>Commit changes</b>를 누르세요.</li>
-        <li>1~2분 뒤 이 자료실 목록에 <b>자동으로</b> 나타납니다.</li>
-      </ol>
-      <div class="uprow">
-        <label for="upCat">분류
-          <select id="upCat"></select>
-        </label>
-        <label for="upNew" id="upNewWrap" hidden>새 분류 이름
-          <input id="upNew" type="text" maxlength="30" placeholder="예: 지구대회 자료">
-        </label>
-        <a class="btn primary big" id="upGo" href="#" target="_blank" rel="noopener">PDF 올리러 가기 →</a>
+      <div id="setup">
+        <p>처음 한 번만 <b>관리자 열쇠(GitHub 토큰)</b>를 등록하면, 이 컴퓨터에서 PDF를 끌어다 놓아 바로 올릴 수 있습니다.</p>
+        <ol>
+          <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub 토큰 만들기 화면</a>을 엽니다. (2025-SU 계정으로 로그인)</li>
+          <li><b>Token name</b>: <code>자료실 올리기</code> · <b>Expiration</b>: 원하는 사용 기간</li>
+          <li><b>Repository access</b>: Only select repositories → <code>rotary3722</code></li>
+          <li><b>Permissions</b> → Repository permissions → <b>Contents</b>를 <b>Read and write</b>로</li>
+          <li><b>Generate token</b>을 누르고, 나온 토큰을 복사해 아래에 붙여 넣으세요.</li>
+        </ol>
+        <div class="uprow">
+          <label for="tokenIn">관리자 열쇠
+            <input id="tokenIn" type="password" autocomplete="off" placeholder="github_pat_로 시작합니다">
+          </label>
+          <button class="btn primary big" id="tokenSave" type="button">등록</button>
+        </div>
+        <p class="upnote" id="tokenMsg">열쇠는 이 브라우저에만 저장되며 다른 사람에게는 보이지 않습니다.</p>
       </div>
-      <p class="upnote">파일 이름을 <code>2026-10-05 신입회원 교육.pdf</code>처럼 날짜로 시작하면 등록일이 표시됩니다. 파일 하나는 25MB 이하로 올려 주세요. 자료를 지우려면 GitHub의 해당 파일 화면에서 휴지통(Delete file)을 누르면 됩니다.</p>
+
+      <div id="ready" hidden>
+        <div class="uprow">
+          <label for="upCat">분류
+            <select id="upCat"></select>
+          </label>
+          <label for="upNew" id="upNewWrap" hidden>새 분류 이름
+            <input id="upNew" type="text" maxlength="30" placeholder="예: 지구대회 자료">
+          </label>
+        </div>
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label="PDF 파일 선택">
+          <strong>PDF를 여기로 끌어다 놓으세요</strong>
+          <small>또는 클릭해서 파일 선택 · 여러 개 한 번에 가능 · 파일당 25MB까지</small>
+        </div>
+        <input type="file" id="fileIn" accept="application/pdf,.pdf" multiple hidden>
+        <ul class="uplist" id="uplist"></ul>
+        <p class="upnote">파일 이름 앞에 오늘 날짜가 자동으로 붙어 등록일로 표시됩니다. 올린 자료는 목록에 바로 나타나고, 1~2분 뒤부터 열 수 있습니다.
+          <button class="linkbtn" id="tokenClear" type="button">이 컴퓨터에서 관리자 열쇠 지우기</button></p>
+      </div>
     </div>
   </details>
 
@@ -201,7 +233,14 @@ function render(){
     </div>`; }).join("");
 }
 
-/* ---------- 자료 올리기 ---------- */
+/* ---------- 자료 올리기 (끌어다 놓기) ---------- */
+const TOKEN_KEY = "rotary3722-upload-token";
+const MAX = 25 * 1024 * 1024;
+const BAD_CHARS = /[\\/:*?"<>|]+/g;
+const getToken = () => { try { return localStorage.getItem(TOKEN_KEY) || ""; } catch(_) { return ""; } };
+const setToken = t => { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch(_) {} };
+let busy = false;
+
 function repoInfo(){
   const host = location.hostname;
   if (host.endsWith(".github.io")){
@@ -211,25 +250,102 @@ function repoInfo(){
   }
   return { owner: "2025-SU", repo: "rotary3722" };
 }
+function gh(path, opts = {}){
+  const { owner, repo } = repoInfo();
+  return fetch(`https://api.github.com/repos/${owner}/${repo}${path}`, { ...opts,
+    headers: { "Accept": "application/vnd.github+json", "Authorization": "Bearer " + getToken(), ...(opts.headers || {}) } });
+}
+function showMode(){ const t = !!getToken(); $("setup").hidden = t; $("ready").hidden = !t; }
+
 function fillUpCats(){
   const cur = $("upCat").value;
   const cats = [...new Set([...CATS, ...rows.map(r => r.category)])];
   $("upCat").innerHTML = cats.map(c => `<option>${esc(c)}</option>`).join("") + `<option value="__new">＋ 새 분류 만들기</option>`;
   if (cur) $("upCat").value = cur;
-  updateUpLink();
+  $("upNewWrap").hidden = $("upCat").value !== "__new";
 }
-function updateUpLink(){
-  const isNew = $("upCat").value === "__new";
-  $("upNewWrap").hidden = !isNew;
-  const cat = isNew ? $("upNew").value.trim().replace(/[\/]/g, " ") : $("upCat").value;
-  const { owner, repo } = repoInfo();
-  const go = $("upGo");
-  if (!cat){ go.removeAttribute("href"); go.setAttribute("aria-disabled","true"); go.style.opacity = .5; return; }
-  go.href = `https://github.com/${owner}/${repo}/upload/main/files/${encodeURIComponent(cat)}`;
-  go.removeAttribute("aria-disabled"); go.style.opacity = "";
+function currentCat(){
+  return $("upCat").value === "__new" ? $("upNew").value.replace(BAD_CHARS, " ").trim() : $("upCat").value;
 }
-$("upCat").addEventListener("change", updateUpLink);
-$("upNew").addEventListener("input", updateUpLink);
+
+$("tokenSave").addEventListener("click", async () => {
+  const t = $("tokenIn").value.trim();
+  if (!t){ $("tokenMsg").textContent = "토큰을 붙여 넣어 주세요."; return; }
+  setToken(t); $("tokenMsg").textContent = "확인하는 중…";
+  try {
+    const r = await gh("");
+    const j = r.ok ? await r.json() : null;
+    if (!r.ok || !(j.permissions && j.permissions.push)) throw 0;
+    $("tokenIn").value = ""; $("tokenMsg").textContent = "열쇠는 이 브라우저에만 저장되며 다른 사람에게는 보이지 않습니다.";
+    showMode();
+  } catch(_) {
+    setToken("");
+    $("tokenMsg").textContent = "이 토큰으로는 올릴 수 없습니다. rotary3722 저장소를 고르고 Contents를 Read and write로 했는지 확인해 주세요.";
+  }
+});
+$("tokenClear").addEventListener("click", () => { setToken(""); $("uplist").innerHTML = ""; showMode(); });
+
+function today(){ const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+function readBase64(file){
+  return new Promise((ok, no) => { const fr = new FileReader(); fr.onload = () => ok(String(fr.result).split(",")[1]); fr.onerror = no; fr.readAsDataURL(file); });
+}
+function addItem(name){
+  const li = document.createElement("li"); li.className = "wait";
+  li.innerHTML = `<span>${esc(name)}</span><span class="st">대기 중</span>`;
+  $("uplist").prepend(li); return li;
+}
+function setItem(li, cls, text){ li.className = cls; li.querySelector(".st").textContent = text; }
+
+async function uploadFiles(files){
+  const cat = currentCat();
+  if (!cat){ $("upNew").focus(); return; }
+  if (busy) return;
+  const queue = [];
+  for (const f of files){
+    const li = addItem(f.name);
+    if (!(f.type === "application/pdf" || /\.pdf$/i.test(f.name))){ setItem(li, "bad", "PDF만 올릴 수 있어요"); continue; }
+    if (f.size > MAX){ setItem(li, "bad", "25MB를 넘어요"); continue; }
+    queue.push({ f, li });
+  }
+  if (!queue.length) return;
+  busy = true;
+  const taken = new Set(rows.map(r => r.path));
+  for (const { f, li } of queue){
+    setItem(li, "wait", "올리는 중…");
+    let base = f.name.replace(/\.pdf$/i, "").replace(BAD_CHARS, " ").replace(/\s+/g, " ").trim() || "자료";
+    if (!/^\d{4}-\d{2}-\d{2}\s/.test(base)) base = today() + " " + base;
+    let path = `files/${cat}/${base}.pdf`, n = 2;
+    while (taken.has(path)) path = `files/${cat}/${base} (${n++}).pdf`;
+    try {
+      const content = await readBase64(f);
+      const r = await gh(`/contents/${encPath(path)}`, { method: "PUT",
+        body: JSON.stringify({ message: `자료 추가: ${cat} / ${base}`, content }) });
+      if (r.status === 201 || r.status === 200){
+        taken.add(path); setItem(li, "ok", "올림 완료");
+        rows.unshift({ ...toRow({ path, size: f.size }), no: rows.length + 1 }); render(); fillUpCats();
+      } else if (r.status === 401){
+        setItem(li, "bad", "열쇠가 만료되었어요. 다시 등록해 주세요"); setToken(""); showMode(); break;
+      } else if (r.status === 403 || r.status === 404){
+        setItem(li, "bad", "올릴 권한이 없어요");
+      } else if (r.status === 422){
+        setItem(li, "bad", "같은 이름의 자료가 있어요");
+      } else {
+        setItem(li, "bad", "실패했어요. 다시 시도해 주세요");
+      }
+    } catch(_) { setItem(li, "bad", "실패했어요. 인터넷 연결을 확인해 주세요"); }
+  }
+  busy = false;
+}
+
+const drop = $("drop"), fileIn = $("fileIn");
+drop.addEventListener("click", () => fileIn.click());
+drop.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); fileIn.click(); } });
+fileIn.addEventListener("change", () => { uploadFiles([...fileIn.files]); fileIn.value = ""; });
+["dragenter","dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => uploadFiles([...e.dataTransfer.files]));
+$("upCat").addEventListener("change", () => { $("upNewWrap").hidden = $("upCat").value !== "__new"; });
+showMode();
 fillUpCats();
 
 $("search").addEventListener("input", e => { query = e.target.value; render(); });
