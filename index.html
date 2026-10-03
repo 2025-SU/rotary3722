@@ -62,6 +62,20 @@ h1 .num{color:var(--accent)}
 .ops{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
 .empty{padding:48px 20px;text-align:center;color:var(--muted)}
 .empty b{display:block;font-family:var(--serif);font-size:18px;color:var(--ink);margin-bottom:6px}
+.upload{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.upload summary{cursor:pointer;padding:14px 18px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:10px;list-style:none}
+.upload summary::-webkit-details-marker{display:none}
+.upload summary .hint{font-weight:400;font-size:12px;color:var(--muted)}
+.upload summary::after{content:"＋";color:var(--accent);font-size:18px}
+.upload[open] summary::after{content:"－"}
+.upbody{padding:0 18px 18px;display:flex;flex-direction:column;gap:14px;border-top:1px solid var(--line);padding-top:16px}
+.upbody ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.upbody code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:4px}
+.uprow{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.uprow label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.uprow select,.uprow input{border:1px solid var(--line);border-radius:6px;padding:8px 10px;background:var(--ground);color:var(--ink);font:inherit;min-width:160px}
+.btn.big{padding:9px 16px;font-size:14px}
+.upnote{font-size:12px;color:var(--muted);margin:0}
 footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
 
 @media (max-width:720px){
@@ -90,6 +104,27 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
     <input class="search" id="search" type="search" placeholder="자료 제목으로 검색">
     <div class="chips" id="chips"></div>
   </section>
+
+  <details class="upload" id="upload">
+    <summary><span>자료 올리기 <span class="hint">관리자용 · GitHub 로그인 필요</span></span></summary>
+    <div class="upbody">
+      <ol>
+        <li>아래에서 <b>분류</b>를 고르고 <b>PDF 올리러 가기</b>를 누르세요.</li>
+        <li>열린 GitHub 화면에 PDF를 <b>끌어다 놓고</b> 아래 초록색 <b>Commit changes</b>를 누르세요.</li>
+        <li>1~2분 뒤 이 자료실 목록에 <b>자동으로</b> 나타납니다.</li>
+      </ol>
+      <div class="uprow">
+        <label for="upCat">분류
+          <select id="upCat"></select>
+        </label>
+        <label for="upNew" id="upNewWrap" hidden>새 분류 이름
+          <input id="upNew" type="text" maxlength="30" placeholder="예: 지구대회 자료">
+        </label>
+        <a class="btn primary big" id="upGo" href="#" target="_blank" rel="noopener">PDF 올리러 가기 →</a>
+      </div>
+      <p class="upnote">파일 이름을 <code>2026-10-05 신입회원 교육.pdf</code>처럼 날짜로 시작하면 등록일이 표시됩니다. 파일 하나는 25MB 이하로 올려 주세요. 자료를 지우려면 GitHub의 해당 파일 화면에서 휴지통(Delete file)을 누르면 됩니다.</p>
+    </div>
+  </details>
 
   <section class="register" id="register" aria-live="polite">
     <div class="empty"><b>자료 목록을 불러오는 중입니다</b></div>
@@ -165,6 +200,37 @@ function render(){
     </div>`; }).join("");
 }
 
+/* ---------- 자료 올리기 ---------- */
+function repoInfo(){
+  const host = location.hostname;
+  if (host.endsWith(".github.io")){
+    const owner = host.split(".")[0];
+    const first = location.pathname.split("/").filter(Boolean)[0];
+    return { owner, repo: first && !first.includes(".") ? first : host };
+  }
+  return { owner: "2025-SU", repo: "rotary3722" };
+}
+function fillUpCats(){
+  const cur = $("upCat").value;
+  const cats = [...new Set([...CATS, ...rows.map(r => r.category)])];
+  $("upCat").innerHTML = cats.map(c => `<option>${esc(c)}</option>`).join("") + `<option value="__new">＋ 새 분류 만들기</option>`;
+  if (cur) $("upCat").value = cur;
+  updateUpLink();
+}
+function updateUpLink(){
+  const isNew = $("upCat").value === "__new";
+  $("upNewWrap").hidden = !isNew;
+  const cat = isNew ? $("upNew").value.trim().replace(/[\/]/g, " ") : $("upCat").value;
+  const { owner, repo } = repoInfo();
+  const go = $("upGo");
+  if (!cat){ go.removeAttribute("href"); go.setAttribute("aria-disabled","true"); go.style.opacity = .5; return; }
+  go.href = `https://github.com/${owner}/${repo}/upload/main/files/${encodeURIComponent(cat)}`;
+  go.removeAttribute("aria-disabled"); go.style.opacity = "";
+}
+$("upCat").addEventListener("change", updateUpLink);
+$("upNew").addEventListener("input", updateUpLink);
+fillUpCats();
+
 $("search").addEventListener("input", e => { query = e.target.value; render(); });
 $("chips").addEventListener("click", e => { const b = e.target.closest("[data-cat]"); if (b){ filterCat = b.dataset.cat; render(); } });
 
@@ -175,6 +241,7 @@ $("chips").addEventListener("click", e => { const b = e.target.closest("[data-ca
   const numbered = [...base].sort((a,b) => a.sortKey.localeCompare(b.sortKey) || a.title.localeCompare(b.title, "ko")).map((r,i) => ({ ...r, no: i+1 }));
   rows = numbered.reverse();
   render();
+  fillUpCats();
 })();
 </script>
 </body>
